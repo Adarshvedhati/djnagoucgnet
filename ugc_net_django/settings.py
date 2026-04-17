@@ -72,6 +72,9 @@ USE_I18N = True
 USE_TZ = False  # Keep False to match Flask's datetime.utcnow() pattern
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS=[
+    BASE_DIR/'static/',
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
