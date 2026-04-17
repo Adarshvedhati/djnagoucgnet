@@ -34,6 +34,19 @@
   .history-row { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:10px; border:1px solid var(--border); background:white; margin-bottom:8px; transition:var(--transition); text-decoration:none; color:var(--text); }
   .history-row:hover { box-shadow:var(--shadow); border-color:var(--gold); }
   .score-circle { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:0.85rem; font-weight:700; flex-shrink:0; }
+  .exam-layout{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:28px;
+  align-items:start;
+}
+
+/* Mobile Layout */
+@media (max-width: 900px){
+  .exam-layout{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 {% endblock %}
 {% block content %}
