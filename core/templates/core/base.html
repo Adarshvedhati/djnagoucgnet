@@ -224,6 +224,262 @@ button {
       width: 100%;
     }
   }
+  /* ============================= */
+/* GLOBAL RESPONSIVE FIXES */
+/* ============================= */
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* Container scaling */
+.container,
+.main-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  margin: auto;
+}
+
+/* ============================= */
+/* NAVBAR RESPONSIVE */
+/* ============================= */
+
+@media (max-width: 900px) {
+  .navbar-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 12px;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .nav-right {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .navbar-brand span {
+    font-size: 1rem;
+  }
+}
+
+/* ============================= */
+/* HERO SECTION */
+/* ============================= */
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 60px 20px;
+}
+
+.hero-inner {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 40px 16px;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 26px !important;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .hero-cta {
+    justify-content: center;
+  }
+
+  .hero-stats {
+    justify-content: center;
+    gap: 16px;
+  }
+}
+
+/* ============================= */
+/* GRID SYSTEM */
+/* ============================= */
+
+.grid,
+.grid-2,
+.grid-3,
+.grid-4 {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================= */
+/* CARDS */
+/* ============================= */
+
+.card {
+  width: 100%;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
+
+@media (max-width: 600px) {
+  .btn,
+  .btn-nav,
+  .btn-hero-primary,
+  .btn-hero-outline {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================= */
+/* EXAM PAGE (VERY IMPORTANT) */
+/* ============================= */
+
+@media (max-width: 900px) {
+  .exam-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-sidebar {
+    display: none;
+  }
+
+  .exam-main {
+    padding: 16px;
+  }
+
+  .question-card {
+    border-radius: 10px;
+  }
+
+  .q-text {
+    font-size: 14px;
+  }
+
+  .option-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* ============================= */
+/* FLEX ROW FIX */
+/* ============================= */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.col {
+  flex: 1 1 300px;
+}
+
+/* Mobile stacking */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+/* ============================= */
+/* FORM CONTROLS */
+/* ============================= */
+
+.form-control {
+  width: 100%;
+}
+
+/* ============================= */
+/* TEXT FIX */
+/* ============================= */
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px !important;
+  }
+
+  h2 {
+    font-size: 18px !important;
+  }
+
+  p {
+    font-size: 14px;
+  }
+}
+
+/* ============================= */
+/* IMAGE FIX */
+/* ============================= */
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================= */
+/* PREVENT OVERFLOW BUGS */
+/* ============================= */
+
+* {
+  max-width: 100%;
+}
   </style>
   {% block extra_css %}{% endblock %}
 </head>
