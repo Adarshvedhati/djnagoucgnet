@@ -33,6 +33,24 @@
   .topic-perf-row:last-child{border-bottom:none;}
   .topic-perf-name{flex:1;font-size:0.875rem;font-weight:600;color:var(--navy);}
   .topic-perf-score{font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--text-muted);width:60px;text-align:right;}
+
+.results-layout{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  gap:28px;
+}
+
+@media (max-width: 900px){
+  .results-layout{
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width:600px){
+  .review-q{
+    font-size:0.85rem;
+  }
+}
+
 </style>
 {% endblock %}
 {% block content %}
@@ -54,7 +72,7 @@
   </div>
 </div>
 <div class="container" style="padding-top:0;">
-  <div style="display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start;">
+  <div class="results-layout">  
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <h2 class="serif" style="color:var(--navy);font-size:1.4rem;">📝 Answer Review</h2>
