@@ -1,0 +1,137 @@
+{% extends 'core/base.html' %}
+{% block title %}Exam Results{% endblock %}
+{% block extra_css %}
+<style>
+  .results-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3050 100%);padding:48px 24px;text-align:center;color:white;margin-bottom:32px;}
+  .score-ring-wrap{margin:0 auto 20px;width:fit-content;}
+  .score-ring{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;margin:0 auto;}
+  .score-ring::before{content:'';position:absolute;inset:0;border-radius:50%;padding:6px;background:conic-gradient(var(--gold) 0% var(--pct),rgba(255,255,255,0.1) var(--pct) 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 10px),black calc(100% - 10px));}
+  .score-value{font-family:'DM Mono',monospace;font-size:2.2rem;font-weight:700;color:white;line-height:1;}
+  .score-label{font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:2px;}
+  .grade-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,0.2);border:1px solid rgba(212,168,67,0.4);color:var(--gold-light);padding:8px 20px;border-radius:99px;font-size:1rem;font-weight:600;margin-bottom:16px;}
+  .results-title{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:6px;}
+  .results-sub{color:rgba(255,255,255,0.6);font-size:0.9rem;}
+  .results-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:800px;margin:24px auto 0;}
+  @media(max-width:640px){.results-stats{grid-template-columns:repeat(2,1fr);}}
+  .results-stat{background:rgba(255,255,255,0.08);border-radius:10px;padding:16px;text-align:center;}
+  .results-stat strong{display:block;font-family:'DM Mono',monospace;font-size:1.4rem;color:var(--gold-light);}
+  .results-stat span{font-size:0.72rem;color:rgba(255,255,255,0.5);}
+  .review-item{background:white;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;overflow:hidden;}
+  .review-header{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .review-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+  .review-correct .review-icon{background:#dcfce7;color:#15803d;}
+  .review-wrong .review-icon{background:#fee2e2;color:#dc2626;}
+  .review-skip .review-icon{background:#f1f5f9;color:#64748b;}
+  .review-q{font-size:0.92rem;color:var(--navy);line-height:1.5;font-weight:500;flex:1;}
+  .review-body{padding:16px 22px;}
+  .option-review{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:6px;}
+  .option-review.correct{background:#dcfce7;border:1px solid #86efac;color:#15803d;}
+  .option-review.wrong-selected{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;}
+  .option-review.neutral{background:var(--cream);border:1px solid var(--border);color:var(--text);}
+  .explanation-box{background:var(--gold-pale);border-left:4px solid var(--gold);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:10px;font-size:0.83rem;color:#7c5c0a;line-height:1.6;}
+  .topic-perf-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .topic-perf-row:last-child{border-bottom:none;}
+  .topic-perf-name{flex:1;font-size:0.875rem;font-weight:600;color:var(--navy);}
+  .topic-perf-score{font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--text-muted);width:60px;text-align:right;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="results-hero">
+  <div class="grade-badge">{{ grade_icon }} {{ grade }}</div>
+  <div class="score-ring-wrap">
+    <div class="score-ring" style="--pct:{{ exam_session.score_percent }}%;">
+      <span class="score-value">{{ exam_session.score_percent|floatformat:1 }}%</span>
+      <span class="score-label">SCORE</span>
+    </div>
+  </div>
+  <div class="results-title">{{ exam_session.title }}</div>
+  <div class="results-sub">Completed {{ exam_session.completed_at|date:"F d, Y" }} at {{ exam_session.completed_at|date:"g:i A" }}</div>
+  <div class="results-stats">
+    <div class="results-stat"><strong>{{ exam_session.correct_answers }}</strong><span>Correct</span></div>
+    <div class="results-stat"><strong>{{ wrong_count }}</strong><span>Wrong</span></div>
+    <div class="results-stat"><strong>{{ skipped }}</strong><span>Skipped</span></div>
+    <div class="results-stat"><strong>{{ exam_session.format_time }}</strong><span>Time Taken</span></div>
+  </div>
+</div>
+<div class="container" style="padding-top:0;">
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start;">
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 class="serif" style="color:var(--navy);font-size:1.4rem;">📝 Answer Review</h2>
+        <div style="display:flex;gap:8px;">
+          <button onclick="filterAnswers('all')" class="btn btn-sm btn-outline" id="f-all">All</button>
+          <button onclick="filterAnswers('correct')" class="btn btn-sm btn-outline" id="f-correct">✅ Correct</button>
+          <button onclick="filterAnswers('wrong')" class="btn btn-sm btn-outline" id="f-wrong">❌ Wrong</button>
+        </div>
+      </div>
+      {% for answer in answers %}
+      {% with q=answer.question %}
+      <div class="review-item {% if not answer.selected_answer %}review-skip{% elif answer.is_correct %}review-correct{% else %}review-wrong{% endif %}"
+           data-type="{% if answer.is_correct %}correct{% elif not answer.selected_answer %}skip{% else %}wrong{% endif %}">
+        <div class="review-header">
+          <div class="review-icon">
+            {% if not answer.selected_answer %}⊘
+            {% elif answer.is_correct %}✓
+            {% else %}✗{% endif %}
+          </div>
+          <div class="review-q">{{ forloop.counter }}. {{ q.question_text }}</div>
+          <span class="badge badge-{{ q.difficulty }}">{{ q.difficulty }}</span>
+        </div>
+        <div class="review-body">
+          {% for opt in q.get_options_list %}
+          <div class="option-review {% if opt.key == q.correct_answer %}correct{% elif answer.selected_answer == opt.key and not answer.is_correct %}wrong-selected{% else %}neutral{% endif %}">
+            <strong style="width:22px;flex-shrink:0;">{{ opt.key }}</strong>
+            <span>{{ opt.text }}</span>
+            {% if opt.key == q.correct_answer %}<i class="fas fa-check-circle" style="margin-left:auto;"></i>{% endif %}
+            {% if opt.key == answer.selected_answer and not answer.is_correct %}<i class="fas fa-times-circle" style="margin-left:auto;"></i>{% endif %}
+          </div>
+          {% endfor %}
+          {% if q.explanation %}
+          <div class="explanation-box"><strong>💡 Explanation:</strong> {{ q.explanation }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body" style="display:grid;gap:10px;">
+          <a href="{% url 'exam_index' %}" class="btn btn-gold btn-block"><i class="fas fa-redo"></i> Take Another Exam</a>
+          <a href="{% url 'dashboard' %}" class="btn btn-primary btn-block"><i class="fas fa-chart-bar"></i> View Dashboard</a>
+          <a href="{% url 'topics_index' %}" class="btn btn-outline btn-block"><i class="fas fa-book-open"></i> Study Topics</a>
+        </div>
+      </div>
+      {% if topic_stats %}
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="fas fa-chart-pie" style="color:var(--gold);"></i> Topic Breakdown</span></div>
+        <div class="card-body">
+          {% for topic_name, stats in topic_stats.items %}
+          <div class="topic-perf-row">
+            <div>
+              <div class="topic-perf-name">{{ topic_name|truncatechars:30 }}</div>
+              <div class="progress-wrap" style="height:4px;width:100%;margin-top:5px;">
+                <div class="progress-bar" style="height:4px;width:{{ stats.percent }}%;background:{% if stats.percent >= 70 %}var(--success){% elif stats.percent >= 50 %}var(--warning){% else %}var(--danger){% endif %};"></div>
+              </div>
+            </div>
+            <div class="topic-perf-score">{{ stats.correct }}/{{ stats.total }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script>
+function filterAnswers(type){
+  document.querySelectorAll('.review-item').forEach(el=>{
+    if(type==='all')el.style.display='';
+    else el.style.display=el.dataset.type===type?'':'none';
+  });
+  ['all','correct','wrong'].forEach(t=>{
+    document.getElementById('f-'+t).className='btn btn-sm '+(t===type?'btn-primary':'btn-outline');
+  });
+}
+</script>
+{% endblock %}

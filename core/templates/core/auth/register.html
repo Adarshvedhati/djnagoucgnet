@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+{% block title %}Create Account{% endblock %}
+{% block extra_css %}
+<style>
+  .auth-page { min-height: calc(100vh - 64px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: linear-gradient(135deg, var(--cream) 0%, #f0ede6 100%); }
+  .auth-card { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); width: 100%; max-width: 480px; overflow: hidden; }
+  .auth-header { background: linear-gradient(135deg, var(--navy), #1a3050); padding: 36px 36px 28px; text-align: center; }
+  .auth-logo { font-size: 2.5rem; margin-bottom: 10px; }
+  .auth-header h1 { font-family:'Playfair Display',serif; color:white; font-size:1.6rem; margin-bottom:6px; }
+  .auth-header p { color:rgba(255,255,255,0.6); font-size:0.875rem; }
+  .auth-body { padding: 32px 36px; }
+  .auth-footer { padding: 20px 36px; background: var(--cream); text-align: center; font-size: 0.875rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+  .auth-footer a { color:var(--navy);font-weight:600;text-decoration:none; }
+  .input-icon-wrap { position: relative; }
+  .input-icon-wrap i { position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.875rem; }
+  .input-icon-wrap .form-control { padding-left:38px; }
+  .perks { background: var(--gold-pale); border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 1px solid rgba(212,168,67,0.3); }
+  .perks p { font-size:0.82rem;color:#7c5c0a;display:flex;align-items:center;gap:8px;margin-bottom:4px; }
+  .perks p:last-child { margin-bottom:0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card fade-in">
+    <div class="auth-header">
+      <div class="auth-logo">🚀</div>
+      <h1>Start Preparing Today</h1>
+      <p>Free account — no credit card needed</p>
+    </div>
+    <div class="auth-body">
+      <div class="perks">
+        <p>✅ Access all Paper 1 &amp; Paper 2 topics</p>
+        <p>✅ Unlimited mock exams</p>
+        <p>✅ Track your progress &amp; scores</p>
+      </div>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" name="username" class="form-control" placeholder="Choose a username" required minlength="3">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-envelope"></i>
+            <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-shield-alt"></i>
+            <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-block btn-lg">
+          <i class="fas fa-user-plus"></i> Create My Account
+        </button>
+      </form>
+    </div>
+    <div class="auth-footer">
+      Already have an account? <a href="{% url 'login' %}">Sign in →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

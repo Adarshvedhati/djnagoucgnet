@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+{% block title %}Home{% endblock %}
+{% block extra_css %}
+<style>
+  .hero { background: linear-gradient(135deg, var(--navy) 0%, #1a3050 60%, #0f2340 100%); padding: 80px 24px 100px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 70%); pointer-events: none; }
+  .hero-inner { max-width: 1280px; margin: 0 auto; position: relative; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(212,168,67,0.15); color: var(--gold-light); padding: 6px 16px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; border: 1px solid rgba(212,168,67,0.25); }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 3.6rem); color: white; line-height: 1.15; margin-bottom: 20px; max-width: 700px; }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: rgba(255,255,255,0.7); font-size: 1.1rem; max-width: 560px; margin-bottom: 36px; line-height: 1.7; }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-hero-primary { background: var(--gold); color: var(--navy); padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: var(--transition); box-shadow: 0 4px 20px rgba(212,168,67,0.4); }
+  .btn-hero-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-hero-outline { background: transparent; color: white; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: var(--transition); border: 2px solid rgba(255,255,255,0.3); }
+  .btn-hero-outline:hover { border-color: white; background: rgba(255,255,255,0.08); }
+  .hero-stats { display: flex; gap: 32px; margin-top: 48px; flex-wrap: wrap; }
+  .hero-stat { color: rgba(255,255,255,0.8); }
+  .hero-stat strong { display: block; font-family:'Playfair Display',serif; font-size: 1.8rem; color: var(--gold-light); }
+  .hero-stat span { font-size: 0.8rem; }
+  .section { padding: 64px 24px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--navy); margin-bottom: 8px; }
+  .section-sub { color: var(--text-muted); margin-bottom: 40px; }
+  .subject-card { background: white; border-radius: var(--radius); padding: 22px; border: 1px solid var(--border); box-shadow: var(--shadow); transition: var(--transition); cursor: pointer; text-decoration: none; display: block; }
+  .subject-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
+  .subject-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+  .subject-name { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .subject-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+  .subject-meta { display: flex; gap: 12px; align-items: center; }
+  .subject-topics { font-size: 0.78rem; color: var(--text-light); }
+  .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  @media(max-width:768px){.feature-grid{grid-template-columns:1fr;}}
+  .feature-card { background: white; border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); text-align: center; }
+  .feature-icon { width: 64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 16px; }
+  .feature-card h3 { font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
+  .feature-card p { font-size:0.875rem; color:var(--text-muted); line-height:1.6; }
+  .cta-section { background: linear-gradient(135deg, var(--navy), #1a3050); padding: 72px 24px; text-align: center; color: white; }
+  .cta-section h2 { font-family:'Playfair Display',serif; font-size:2.2rem; margin-bottom:12px; }
+  .cta-section p { color:rgba(255,255,255,0.7); margin-bottom:32px; font-size:1.05rem; }
+</style>
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-inner fade-in">
+    <div class="hero-eyebrow">🎯 UGC NET IT &amp; Computer Science</div>
+    <h1>Master Your <span>UGC NET</span><br>Preparation</h1>
+    <p>Comprehensive study material, mock exams, and progress tracking for Paper 1 &amp; Paper 2. Your one-stop platform to crack UGC NET.</p>
+    <div class="hero-cta">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn-hero-primary"><i class="fas fa-chart-line"></i> My Dashboard</a>
+        <a href="{% url 'exam_index' %}" class="btn-hero-outline"><i class="fas fa-pen"></i> Take Mock Exam</a>
+      {% else %}
+        <a href="{% url 'register' %}" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Preparing Free</a>
+        <a href="{% url 'topics_index' %}" class="btn-hero-outline"><i class="fas fa-book-open"></i> Browse Topics</a>
+      {% endif %}
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>{{ stats.total_topics }}+</strong><span>Study Topics</span></div>
+      <div class="hero-stat"><strong>{{ stats.total_questions }}+</strong><span>Practice Questions</span></div>
+      <div class="hero-stat"><strong>2</strong><span>Papers Covered</span></div>
+      <div class="hero-stat"><strong>Free</strong><span>Always</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--cream);">
+  <div style="max-width:1280px;margin:0 auto;">
+    <h2 class="section-title" style="text-align:center;">Everything You Need to Succeed</h2>
+    <p class="section-sub" style="text-align:center;max-width:520px;margin:8px auto 40px;">Structured learning paths, real exam simulations, and intelligent progress tracking.</p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(212,168,67,0.12);">📚</div>
+        <h3>Rich Study Material</h3>
+        <p>Comprehensive topic explanations for all Paper 1 &amp; Paper 2 subjects with key concepts, formulas, and examples.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,70,229,0.1);">⏱️</div>
+        <h3>Timed Mock Exams</h3>
+        <p>Realistic exam simulation with randomized questions, countdown timer, instant scoring and detailed review.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(8,145,178,0.1);">📊</div>
+        <h3>Progress Analytics</h3>
+        <p>Track topics completed, exam scores, study time, and get personalized insights on your weak areas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:white;">
+  <div style="max-width:1280px;margin:0 auto;">
+    <h2 class="section-title">Explore by Paper</h2>
+    <p class="section-sub">Complete syllabus coverage for UGC NET IT &amp; Computer Science</p>
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <span class="badge badge-paper1" style="font-size:0.85rem;padding:6px 16px;">Paper I — General Aptitude</span>
+        <span style="font-size:0.82rem;color:var(--text-muted);">{{ paper1_subjects|length }} subjects</span>
+      </div>
+      <div class="grid grid-4">
+        {% for subject in paper1_subjects %}
+        <a href="{% url 'topics_index' %}?paper=paper1" class="subject-card">
+          <span class="subject-icon">{{ subject.icon }}</span>
+          <div class="subject-name">{{ subject.name }}</div>
+          <div class="subject-desc">{{ subject.description|truncatechars:80 }}</div>
+          <div class="subject-meta">
+            <span class="badge badge-paper1">Paper 1</span>
+            <span class="subject-topics">{{ subject.topics.count }} topics</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <span class="badge badge-paper2" style="font-size:0.85rem;padding:6px 16px;">Paper II — IT &amp; Computer Science</span>
+        <span style="font-size:0.82rem;color:var(--text-muted);">{{ paper2_subjects|length }} subjects</span>
+      </div>
+      <div class="grid grid-4">
+        {% for subject in paper2_subjects %}
+        <a href="{% url 'topics_index' %}?paper=paper2" class="subject-card">
+          <span class="subject-icon">{{ subject.icon }}</span>
+          <div class="subject-name">{{ subject.name }}</div>
+          <div class="subject-desc">{{ subject.description|truncatechars:80 }}</div>
+          <div class="subject-meta">
+            <span class="badge badge-paper2">Paper 2</span>
+            <span class="subject-topics">{{ subject.topics.count }} topics</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if not user.is_authenticated %}
+<section class="cta-section">
+  <h2>Ready to Start Your Journey?</h2>
+  <p>Join thousands of aspirants preparing for UGC NET. Free forever.</p>
+  <a href="{% url 'register' %}" class="btn-hero-primary" style="display:inline-flex;">
+    <i class="fas fa-user-plus"></i> Create Free Account
+  </a>
+</section>
+{% endif %}
+{% endblock %}

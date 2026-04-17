@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Login{% endblock %}
+{% block extra_css %}
+<style>
+  .auth-page { min-height: calc(100vh - 64px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: linear-gradient(135deg, var(--cream) 0%, #f0ede6 100%); }
+  .auth-card { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); width: 100%; max-width: 440px; overflow: hidden; }
+  .auth-header { background: var(--navy); padding: 36px 36px 28px; text-align: center; }
+  .auth-logo { font-size: 2.5rem; margin-bottom: 10px; }
+  .auth-header h1 { font-family: 'Playfair Display', serif; color: white; font-size: 1.6rem; margin-bottom: 6px; }
+  .auth-header p { color: rgba(255,255,255,0.6); font-size: 0.875rem; }
+  .auth-body { padding: 36px; }
+  .auth-footer { padding: 20px 36px; background: var(--cream); text-align: center; font-size: 0.875rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+  .auth-footer a { color: var(--navy); font-weight: 600; text-decoration: none; }
+  .auth-footer a:hover { color: var(--gold); }
+  .input-icon-wrap { position: relative; }
+  .input-icon-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem; }
+  .input-icon-wrap .form-control { padding-left: 38px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card fade-in">
+    <div class="auth-header">
+      <div class="auth-logo">🎓</div>
+      <h1>Welcome Back</h1>
+      <p>Sign in to continue your UGC NET preparation</p>
+    </div>
+    <div class="auth-body">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+          </div>
+        </div>
+        <label class="form-check" style="margin-bottom:20px;">
+          <input type="checkbox" name="remember">
+          <span style="font-size:0.875rem;color:var(--text-muted);">Remember me for 7 days</span>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+    </div>
+    <div class="auth-footer">
+      Don't have an account? <a href="{% url 'register' %}">Create one free →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

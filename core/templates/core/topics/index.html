@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+{% load core_tags %}
+{% block title %}Topics{% endblock %}
+{% block extra_css %}
+<style>
+  .filter-bar { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; display: flex; align-items: center; gap: 8px; margin-bottom: 28px; box-shadow: var(--shadow); flex-wrap: wrap; }
+  .filter-label { font-size:0.8rem;font-weight:600;color:var(--text-muted); margin-right:4px; }
+  .filter-btn { padding: 7px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: 2px solid var(--border); background: white; color: var(--text-muted); text-decoration: none; transition: var(--transition); }
+  .filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .filter-btn.p1.active { background: var(--paper1); border-color: var(--paper1); }
+  .filter-btn.p2.active { background: var(--paper2); border-color: var(--paper2); }
+  .subject-section { margin-bottom: 40px; }
+  .subject-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid var(--border); }
+  .subject-header-icon { width: 44px; height:44px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-size: 1.4rem; }
+  .subject-header-text h3 { font-size:1.05rem; font-weight:700; color:var(--navy); }
+  .subject-header-text p { font-size:0.8rem; color:var(--text-muted); }
+  .topic-row { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 8px; transition: var(--transition); text-decoration: none; color: var(--text); }
+  .topic-row:hover { transform: translateX(4px); box-shadow: var(--shadow); border-color: var(--gold); }
+  .topic-row.completed { border-left: 4px solid var(--success); }
+  .topic-status { width: 28px; height:28px; border-radius:50%; border: 2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.75rem; }
+  .topic-status.done { background:var(--success); border-color:var(--success); color:white; }
+  .topic-info { flex: 1; }
+  .topic-title { font-weight: 600; font-size: 0.95rem; color: var(--navy); margin-bottom: 3px; }
+  .topic-meta { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .topic-meta span { font-size:0.75rem; color:var(--text-muted); }
+  .topic-arrow { color:var(--text-light); font-size:0.8rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>📖 Study Topics</h1>
+    <p>Comprehensive coverage for UGC NET Paper 1 &amp; Paper 2</p>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <a href="{% url 'topics_index' %}" class="filter-btn {% if paper == 'all' %}active{% endif %}">All Papers</a>
+    <a href="{% url 'topics_index' %}?paper=paper1" class="filter-btn p1 {% if paper == 'paper1' %}active{% endif %}">📋 Paper 1</a>
+    <a href="{% url 'topics_index' %}?paper=paper2" class="filter-btn p2 {% if paper == 'paper2' %}active{% endif %}">💻 Paper 2</a>
+    {% if user.is_authenticated %}
+    <span style="margin-left:auto;font-size:0.82rem;color:var(--text-muted);">
+      <strong style="color:var(--success);">{{ user_progress|length }}</strong> topics tracked
+    </span>
+    {% endif %}
+  </div>
+
+  {% for subject in subjects %}
+  <div class="subject-section">
+    <div class="subject-header">
+      <div class="subject-header-icon" style="background:{% if subject.paper == 'paper1' %}rgba(79,70,229,0.1){% else %}rgba(8,145,178,0.1){% endif %};">
+        {{ subject.icon }}
+      </div>
+      <div class="subject-header-text">
+        <h3>{{ subject.name }}</h3>
+        <p>{{ subject.description }} · {{ subject.topics.count }} topics ·
+          <span class="badge {% if subject.paper == 'paper1' %}badge-paper1{% else %}badge-paper2{% endif %}">{% if subject.paper == 'paper1' %}Paper 1{% else %}Paper 2{% endif %}</span>
+        </p>
+      </div>
+    </div>
+    {% for topic in subject.topics.all %}
+      {% with progress=user_progress|get_item:topic.id %}
+      <a href="{% url 'topic_detail' slug=topic.slug %}"
+         class="topic-row {% if progress and progress.completed %}completed{% endif %}">
+        <div class="topic-status {% if progress and progress.completed %}done{% endif %}">
+          {% if progress and progress.completed %}
+            <i class="fas fa-check"></i>
+          {% else %}
+            <i class="fas fa-circle" style="color:var(--border);font-size:0.5rem;"></i>
+          {% endif %}
+        </div>
+        <div class="topic-info">
+          <div class="topic-title">{{ topic.title }}</div>
+          <div class="topic-meta">
+            <span><i class="fas fa-clock" style="margin-right:3px;"></i>{{ topic.estimated_minutes }} min</span>
+            <span class="badge badge-{{ topic.difficulty }}">{{ topic.difficulty|title }}</span>
+            <span><i class="fas fa-question-circle" style="margin-right:3px;"></i>{{ topic.get_question_count }} questions</span>
+          </div>
+        </div>
+        {% if progress and progress.completed %}
+          <span style="font-size:0.75rem;color:var(--success);font-weight:600;">Done ✓</span>
+        {% endif %}
+        <i class="fas fa-chevron-right topic-arrow"></i>
+      </a>
+      {% endwith %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

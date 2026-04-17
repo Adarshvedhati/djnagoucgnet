@@ -1,0 +1,170 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+  .dash-header{background:linear-gradient(135deg,var(--navy),#1a3050);padding:36px 24px 48px;margin-bottom:-24px;}
+  .dash-header-inner{max-width:1280px;margin:0 auto;}
+  .dash-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:white;margin-bottom:4px;}
+  .dash-header p{color:rgba(255,255,255,0.6);font-size:0.9rem;}
+  .dash-header-streak{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);color:var(--gold-light);padding:6px 14px;border-radius:99px;font-size:0.8rem;font-weight:600;margin-top:12px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  @media(max-width:768px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+  .dash-stat{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;}
+  .dash-stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px;}
+  .dash-stat-value{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--navy);line-height:1;}
+  .dash-stat-label{font-size:0.78rem;color:var(--text-muted);margin-top:4px;}
+  .chart-card{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+  .chart-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .chart-title{font-size:0.95rem;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;}
+  .chart-body{padding:24px;}
+  canvas{max-height:220px;}
+  .subject-perf-item{margin-bottom:14px;}
+  .subject-perf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+  .subject-perf-name{font-size:0.85rem;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:6px;}
+  .subject-perf-count{font-size:0.78rem;color:var(--text-muted);}
+  .subject-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+  .subject-bar-fill{height:100%;border-radius:99px;transition:width 1s ease;}
+  .paper-prog-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .paper-prog-row:last-child{margin-bottom:0;}
+  .paper-label{font-size:0.85rem;font-weight:600;color:var(--navy);min-width:70px;}
+  .paper-bar{flex:1;height:12px;background:var(--border);border-radius:99px;overflow:hidden;}
+  .paper-bar-fill{height:100%;border-radius:99px;}
+  .paper-count{font-size:0.8rem;color:var(--text-muted);min-width:55px;text-align:right;}
+  .suggest-card{background:white;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:var(--text);transition:var(--transition);margin-bottom:10px;}
+  .suggest-card:hover{transform:translateX(4px);box-shadow:var(--shadow-lg);border-color:var(--gold);}
+  .suggest-icon{font-size:1.6rem;}
+  .suggest-title{font-weight:600;font-size:0.9rem;color:var(--navy);margin-bottom:3px;}
+  .suggest-meta{font-size:0.78rem;color:var(--text-muted);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dash-header">
+  <div class="dash-header-inner">
+    <h1>Welcome back, {{ user.username }}! 👋</h1>
+    <p>Here's your UGC NET preparation overview</p>
+    <div class="dash-header-streak">🔥 {{ user.study_streak }} day streak · {{ total_study }} min total study time</div>
+  </div>
+</div>
+<div class="container">
+  <div class="stats-row">
+    <div class="dash-stat"><div class="dash-stat-icon" style="background:rgba(212,168,67,0.12);">📚</div><div class="dash-stat-value">{{ progress_percent }}%</div><div class="dash-stat-label">Topics Completed<br><small style="color:var(--text-light);">{{ completed_topics }}/{{ total_topics }}</small></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon" style="background:rgba(79,70,229,0.1);">🎯</div><div class="dash-stat-value">{{ avg_score }}%</div><div class="dash-stat-label">Average Score<br><small style="color:var(--text-light);">{{ total_exams }} exams taken</small></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon" style="background:rgba(34,197,94,0.1);">🏆</div><div class="dash-stat-value">{{ best_score }}%</div><div class="dash-stat-label">Best Score<br><small style="color:var(--text-light);">All time high</small></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon" style="background:rgba(8,145,178,0.1);">⏱️</div><div class="dash-stat-value">{{ week_study }}</div><div class="dash-stat-label">Minutes This Week<br><small style="color:var(--text-light);">Study time logged</small></div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div class="chart-card">
+      <div class="chart-header"><div class="chart-title"><i class="fas fa-chart-bar" style="color:var(--gold);"></i> Study Activity (14 Days)</div></div>
+      <div class="chart-body"><canvas id="studyChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title"><i class="fas fa-chart-line" style="color:var(--paper2);"></i> Score Trend</div>
+        <a href="{% url 'exam_history' %}" style="font-size:0.8rem;color:var(--gold);text-decoration:none;">View All</a>
+      </div>
+      <div class="chart-body">
+        {% if score_trend %}
+        <canvas id="scoreChart"></canvas>
+        {% else %}
+        <div style="text-align:center;padding:40px 0;color:var(--text-muted);"><div style="font-size:2.5rem;margin-bottom:10px;">📊</div><p style="font-size:0.875rem;">Take exams to see your score trend</p><a href="{% url 'exam_index' %}" class="btn btn-gold btn-sm" style="margin-top:12px;">Start Exam</a></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+    <div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title"><i class="fas fa-tasks" style="color:var(--paper1);"></i> Paper Progress</div></div>
+        <div class="chart-body">
+          <div class="paper-prog-row">
+            <div class="paper-label">📋 Paper 1</div>
+            <div class="paper-bar"><div class="paper-bar-fill" style="width:{{ paper1_percent }}%;background:var(--paper1);"></div></div>
+            <div class="paper-count">{{ paper1_done }}/{{ paper1_topics }}</div>
+          </div>
+          <div class="paper-prog-row">
+            <div class="paper-label">💻 Paper 2</div>
+            <div class="paper-bar"><div class="paper-bar-fill" style="width:{{ paper2_percent }}%;background:var(--paper2);"></div></div>
+            <div class="paper-count">{{ paper2_done }}/{{ paper2_topics }}</div>
+          </div>
+          <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">Subject-wise Progress</div>
+            {% for sp in subject_progress %}
+            <div class="subject-perf-item">
+              <div class="subject-perf-header">
+                <div class="subject-perf-name">{{ sp.icon }} {{ sp.name|truncatechars:20 }}
+                  <span class="badge {% if sp.paper == 'paper1' %}badge-paper1{% else %}badge-paper2{% endif %}" style="font-size:0.65rem;">{% if sp.paper == 'paper1' %}P1{% else %}P2{% endif %}</span>
+                </div>
+                <div class="subject-perf-count">{{ sp.done }}/{{ sp.total }}</div>
+              </div>
+              <div class="subject-bar">
+                <div class="subject-bar-fill" style="width:{{ sp.percent }}%;background:{% if sp.paper == 'paper1' %}var(--paper1){% else %}var(--paper2){% endif %};"></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="chart-card" style="margin-bottom:20px;">
+        <div class="chart-header">
+          <div class="chart-title"><i class="fas fa-star" style="color:var(--gold);"></i> Continue Studying</div>
+          <a href="{% url 'topics_index' %}" style="font-size:0.8rem;color:var(--gold);text-decoration:none;">Browse All</a>
+        </div>
+        <div class="chart-body">
+          {% if suggested_topics %}
+            {% for t in suggested_topics %}
+            <a href="{% url 'topic_detail' slug=t.slug %}" class="suggest-card">
+              <div class="suggest-icon">{{ t.subject.icon }}</div>
+              <div>
+                <div class="suggest-title">{{ t.title }}</div>
+                <div class="suggest-meta">{{ t.subject.name }} · {{ t.estimated_minutes }} min · <span class="badge badge-{{ t.difficulty }}">{{ t.difficulty }}</span></div>
+              </div>
+              <i class="fas fa-arrow-right" style="color:var(--text-light);margin-left:auto;margin-top:2px;font-size:0.8rem;"></i>
+            </a>
+            {% endfor %}
+          {% else %}
+          <div style="text-align:center;padding:20px;color:var(--text-muted);"><div style="font-size:2rem;margin-bottom:8px;">🎉</div><p style="font-size:0.875rem;">All topics completed! Amazing work!</p></div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title"><i class="fas fa-history" style="color:var(--paper2);"></i> Recent Exams</div>
+          <a href="{% url 'exam_history' %}" style="font-size:0.8rem;color:var(--gold);text-decoration:none;">All History</a>
+        </div>
+        <div class="chart-body" style="padding:12px;">
+          {% if recent_exams %}
+            {% for s in recent_exams %}
+            <a href="{% url 'exam_results' session_id=s.id %}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:var(--text);transition:var(--transition);" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">
+              <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;font-family:'DM Mono',monospace;{% if s.score_percent >= 70 %}background:#dcfce7;color:#15803d;{% elif s.score_percent >= 55 %}background:#fef3c7;color:#d97706;{% else %}background:#fee2e2;color:#dc2626;{% endif %}">
+                {{ s.score_percent|floatformat:0 }}%
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:600;color:var(--navy);">{{ s.title|truncatechars:30 }}</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">{{ s.correct_answers }}/{{ s.total_questions }} · {{ s.completed_at|date:"M d" }}</div>
+              </div>
+            </a>
+            {% endfor %}
+          {% else %}
+          <div style="text-align:center;padding:24px 12px;color:var(--text-muted);"><p style="font-size:0.875rem;margin-bottom:12px;">No exams yet. Start one!</p><a href="{% url 'exam_index' %}" class="btn btn-gold btn-sm"><i class="fas fa-play"></i> Start Now</a></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const dailyData = {{ daily_data_json|safe }};
+const scoreTrend = {{ score_trend_json|safe }};
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#6b7a90';
+new Chart(document.getElementById('studyChart'),{type:'bar',data:{labels:dailyData.map(d=>d.date),datasets:[{label:'Minutes',data:dailyData.map(d=>d.minutes),backgroundColor:'rgba(212,168,67,0.7)',borderColor:'rgba(212,168,67,1)',borderWidth:1,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} min`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'m'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}}}}});
+if(document.getElementById('scoreChart')&&scoreTrend.length>0){
+  new Chart(document.getElementById('scoreChart'),{type:'line',data:{labels:scoreTrend.map(d=>d.date),datasets:[{label:'Score %',data:scoreTrend.map(d=>d.score),borderColor:'#0891b2',backgroundColor:'rgba(8,145,178,0.08)',borderWidth:2.5,pointBackgroundColor:'#0891b2',pointRadius:5,pointHoverRadius:7,tension:0.35,fill:true}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Score: ${ctx.raw.toFixed(1)}%`}}},scales:{y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}}}}});
+}
+</script>
+{% endblock %}

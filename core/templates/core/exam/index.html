@@ -1,0 +1,151 @@
+{% extends 'core/base.html' %}
+{% block title %}Mock Exam{% endblock %}
+{% block extra_css %}
+<style>
+  .exam-hero { background: linear-gradient(135deg, #1a1060 0%, #0d1b2a 100%); padding: 48px 24px; margin-bottom: 32px; }
+  .exam-hero-inner { max-width: 1280px; margin: 0 auto; }
+  .exam-hero h1 { font-family:'Playfair Display',serif; font-size:2rem; color:white; margin-bottom:8px; }
+  .exam-hero p { color:rgba(255,255,255,0.65); }
+  .config-card { background:white; border-radius:var(--radius); box-shadow:var(--shadow-lg); border:1px solid var(--border); overflow:hidden; }
+  .config-header { background: linear-gradient(90deg, var(--navy), var(--navy-mid)); padding: 24px 28px; display:flex; align-items:center; gap:12px; }
+  .config-header h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:white; }
+  .config-body { padding:28px; }
+  .option-grid { display:grid; gap:12px; }
+  .option-grid-2 { grid-template-columns: 1fr 1fr; }
+  @media(max-width:640px){ .option-grid-2 { grid-template-columns:1fr; } }
+  .option-pill { position:relative; cursor:pointer; }
+  .option-pill input { position:absolute; opacity:0; width:0; height:0; }
+  .option-pill-label { display:flex; align-items:center; gap:12px; padding:14px 18px; border:2px solid var(--border); border-radius:10px; cursor:pointer; transition:var(--transition); background:white; }
+  .option-pill-label:hover { border-color:var(--navy); }
+  .option-pill input:checked ~ .option-pill-label { border-color:var(--gold); background:var(--gold-pale); }
+  .option-pill-icon { font-size:1.4rem; }
+  .option-pill-text strong { display:block; font-size:0.9rem; font-weight:700; color:var(--navy); }
+  .option-pill-text span { font-size:0.78rem; color:var(--text-muted); }
+  .range-value { font-family:'DM Mono',monospace; font-weight:700; color:var(--navy); font-size:1.1rem; }
+  input[type=range] { width:100%; height:6px; border-radius:3px; background:linear-gradient(90deg, var(--gold) 0%, var(--border) 0%); outline:none; cursor:pointer; border:none; -webkit-appearance:none; margin:12px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--navy); border:3px solid var(--gold); cursor:pointer; }
+  .subject-check-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  @media(max-width:768px){ .subject-check-grid{grid-template-columns:repeat(2,1fr);} }
+  .subject-check { display:flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:0.8rem; transition:var(--transition); }
+  .subject-check:hover { border-color:var(--navy); }
+  .subject-check input { accent-color:var(--gold); }
+  .start-btn { background:linear-gradient(135deg, var(--gold), var(--gold-light)); color:var(--navy); padding:16px 40px; border-radius:12px; font-size:1.05rem; font-weight:700; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:10px; transition:var(--transition); box-shadow:0 4px 20px rgba(212,168,67,0.35); width:100%; justify-content:center; }
+  .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(212,168,67,0.5); }
+  .history-row { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:10px; border:1px solid var(--border); background:white; margin-bottom:8px; transition:var(--transition); text-decoration:none; color:var(--text); }
+  .history-row:hover { box-shadow:var(--shadow); border-color:var(--gold); }
+  .score-circle { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:0.85rem; font-weight:700; flex-shrink:0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="exam-hero">
+  <div class="exam-hero-inner">
+    <h1>🎯 Mock Exam Generator</h1>
+    <p>Simulate real UGC NET exam conditions with timed, randomized questions</p>
+  </div>
+</div>
+<div class="container" style="padding-top:0;">
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;">
+    <div class="config-card">
+      <div class="config-header">
+        <i class="fas fa-sliders-h" style="color:var(--gold);font-size:1.3rem;"></i>
+        <h2>Configure Your Exam</h2>
+      </div>
+      <div class="config-body">
+        {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'exam_start' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">📄 Select Paper</label>
+            <div class="option-grid option-grid-2">
+              <label class="option-pill"><input type="radio" name="paper" value="paper1"><div class="option-pill-label"><div class="option-pill-icon">📋</div><div class="option-pill-text"><strong>Paper 1</strong><span>General Aptitude</span></div></div></label>
+              <label class="option-pill"><input type="radio" name="paper" value="paper2"><div class="option-pill-label"><div class="option-pill-icon">💻</div><div class="option-pill-text"><strong>Paper 2</strong><span>IT &amp; CS</span></div></div></label>
+              <label class="option-pill" style="grid-column:1/-1;"><input type="radio" name="paper" value="mixed" checked><div class="option-pill-label"><div class="option-pill-icon">🎯</div><div class="option-pill-text"><strong>Mixed (Both Papers)</strong><span>Full exam simulation</span></div></div></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">❓ Number of Questions: <span class="range-value" id="qNum">25</span></label>
+            <input type="range" name="num_questions" id="qSlider" min="5" max="100" value="25" oninput="document.getElementById('qNum').textContent=this.value;updateRange(this);">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);"><span>5 (Quick)</span><span>25 (Standard)</span><span>50 (Full)</span><span>100 (Max)</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">⏱️ Time Limit: <span class="range-value" id="tNum">45</span> min</label>
+            <input type="range" name="time_limit" id="tSlider" min="10" max="180" value="45" step="5" oninput="document.getElementById('tNum').textContent=this.value;updateRange(this);">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);"><span>10m</span><span>45m</span><span>90m</span><span>3h</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">⚡ Difficulty</label>
+            <select name="difficulty" class="form-control">
+              <option value="all">All Difficulties</option>
+              <option value="easy">Easy Only</option>
+              <option value="medium">Medium Only</option>
+              <option value="hard">Hard Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📚 Filter by Subject <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+            <div class="subject-check-grid">
+              {% for subject in subjects %}
+              <label class="subject-check">
+                <input type="checkbox" name="subjects" value="{{ subject.id }}">
+                <span>{{ subject.icon }} {{ subject.name|truncatechars:22 }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="submit" class="start-btn"><i class="fas fa-play-circle"></i> Start Mock Exam</button>
+        </form>
+        {% else %}
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px;">🔐</div>
+          <h3 style="color:var(--navy);margin-bottom:8px;">Login Required</h3>
+          <p style="color:var(--text-muted);margin-bottom:24px;">Create a free account to take mock exams and track your scores.</p>
+          <a href="{% url 'register' %}" class="btn btn-gold btn-lg"><i class="fas fa-user-plus"></i> Register Free</a>
+          <div style="margin-top:12px;"><a href="{% url 'login' %}" style="color:var(--text-muted);font-size:0.875rem;">Already have an account? Login</a></div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><span class="card-title"><i class="fas fa-lightbulb" style="color:var(--gold);"></i> Exam Tips</span></div>
+        <div class="card-body">
+          <div style="display:grid;gap:10px;">
+            <div style="display:flex;gap:10px;font-size:0.83rem;"><span style="font-size:1rem;">🎯</span><span style="color:var(--text-muted);">Attempt Paper 1 first — it carries equal weight</span></div>
+            <div style="display:flex;gap:10px;font-size:0.83rem;"><span style="font-size:1rem;">⏱️</span><span style="color:var(--text-muted);">Spend ~1.5 min per question for Paper 2</span></div>
+            <div style="display:flex;gap:10px;font-size:0.83rem;"><span style="font-size:1rem;">✏️</span><span style="color:var(--text-muted);">Mark tricky questions and revisit them</span></div>
+            <div style="display:flex;gap:10px;font-size:0.83rem;"><span style="font-size:1rem;">📊</span><span style="color:var(--text-muted);">Review explanations after each exam</span></div>
+          </div>
+        </div>
+      </div>
+      {% if recent_sessions %}
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-history" style="color:var(--paper2);"></i> Recent Exams</span>
+          <a href="{% url 'exam_history' %}" style="font-size:0.8rem;color:var(--gold);text-decoration:none;">View All</a>
+        </div>
+        <div class="card-body" style="padding:12px;">
+          {% for s in recent_sessions %}
+          <a href="{% url 'exam_results' session_id=s.id %}" class="history-row">
+            <div class="score-circle" style="{% if s.score_percent >= 70 %}background:#dcfce7;color:#15803d;{% elif s.score_percent >= 55 %}background:#fef3c7;color:#d97706;{% else %}background:#fee2e2;color:#dc2626;{% endif %}">
+              {{ s.score_percent|floatformat:0 }}%
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:0.85rem;font-weight:600;color:var(--navy);">{{ s.title|truncatechars:35 }}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">{{ s.correct_answers }}/{{ s.total_questions }} correct · {{ s.completed_at|date:"M d" }}</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:var(--text-light);font-size:0.75rem;"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function updateRange(input){ const pct=(input.value-input.min)/(input.max-input.min)*100; input.style.background=`linear-gradient(90deg, var(--gold) ${pct}%, var(--border) ${pct}%)`; }
+['qSlider','tSlider'].forEach(id=>{const el=document.getElementById(id);if(el)updateRange(el);});
+</script>
+{% endblock %}

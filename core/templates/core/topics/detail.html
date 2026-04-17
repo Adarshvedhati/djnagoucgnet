@@ -1,0 +1,170 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ topic.title }}{% endblock %}
+{% block extra_css %}
+<style>
+  .topic-layout { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; }
+  @media(max-width:1024px){ .topic-layout { grid-template-columns: 1fr; } .topic-sidebar { order: -1; } }
+  .content-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .content-header { background: linear-gradient(135deg, var(--navy), #1a3050); padding: 32px; color: white; }
+  .content-header h1 { font-family: 'Playfair Display', serif; font-size: 1.7rem; margin-bottom: 10px; }
+  .content-header-meta { display:flex;gap:12px;flex-wrap:wrap;align-items:center; }
+  .content-body { padding: 32px; }
+  .md-content h2 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--navy); margin:28px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--gold); }
+  .md-content h3 { font-size:1.1rem; font-weight:700; color:var(--navy); margin:20px 0 8px; }
+  .md-content p { color:var(--text); line-height:1.75; margin-bottom:14px; }
+  .md-content ul, .md-content ol { padding-left:24px; margin-bottom:14px; }
+  .md-content li { margin-bottom:6px; color:var(--text); line-height:1.6; }
+  .md-content code { background:var(--cream); border:1px solid var(--border); padding:2px 7px; border-radius:4px; font-family:'DM Mono',monospace; font-size:0.85rem; color:#d44000; }
+  .md-content pre { background:var(--navy); color:#e8f0fe; padding:20px; border-radius:10px; overflow-x:auto; margin:16px 0; }
+  .md-content pre code { background:none; border:none; color:inherit; padding:0; font-size:0.875rem; }
+  .md-content table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.875rem; }
+  .md-content th { background:var(--navy); color:white; padding:10px 14px; text-align:left; }
+  .md-content td { padding:10px 14px; border-bottom:1px solid var(--border); }
+  .md-content tr:hover td { background:var(--cream); }
+  .md-content blockquote { border-left:4px solid var(--gold); padding:12px 16px; background:var(--gold-pale); border-radius:0 8px 8px 0; margin:16px 0; color:#7c5c0a; }
+  .md-content strong { color:var(--navy); }
+  .sidebar-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+  .sidebar-card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+  .sidebar-card-body { padding: 18px; }
+  .timer-display { font-family: 'DM Mono', monospace; font-size: 1.8rem; text-align: center; color: var(--navy); padding: 12px; background: var(--cream); border-radius: 8px; margin-bottom: 12px; }
+  .completed-badge { display:flex; align-items:center; gap:8px; background:#dcfce7; color:#15803d; padding:10px 14px; border-radius:8px; font-size:0.875rem; font-weight:600; margin-bottom:12px; }
+  .note-area { width:100%; height:120px; border:2px solid var(--border); border-radius:8px; padding:10px; font-size:0.85rem; font-family:inherit; resize:vertical; outline:none; transition:var(--transition); }
+  .note-area:focus { border-color:var(--gold); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="breadcrumb">
+    <a href="{% url 'home' %}">Home</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="{% url 'topics_index' %}">Topics</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="{% url 'topics_index' %}?paper={{ topic.subject.paper }}">{{ topic.subject.name }}</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>{{ topic.title }}</span>
+  </div>
+
+  <div class="topic-layout">
+    <div>
+      <div class="content-card">
+        <div class="content-header">
+          <div class="content-header-meta" style="margin-bottom:12px;">
+            <span class="badge {% if topic.subject.paper == 'paper1' %}badge-paper1{% else %}badge-paper2{% endif %}" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);">
+              {% if topic.subject.paper == 'paper1' %}📋 Paper 1{% else %}💻 Paper 2{% endif %}
+            </span>
+            <span class="badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);">{{ topic.subject.name }}</span>
+          </div>
+          <h1>{{ topic.title }}</h1>
+          <div class="content-header-meta">
+            <span style="font-size:0.82rem;color:rgba(255,255,255,0.65);"><i class="fas fa-clock" style="margin-right:4px;"></i>{{ topic.estimated_minutes }} min read</span>
+            <span class="badge badge-{{ topic.difficulty }}" style="border:1px solid rgba(255,255,255,0.2);">{{ topic.difficulty|title }}</span>
+            <span style="font-size:0.82rem;color:rgba(255,255,255,0.65);"><i class="fas fa-question-circle" style="margin-right:4px;"></i>{{ topic.get_question_count }} practice questions</span>
+          </div>
+        </div>
+        {% if topic.summary %}
+        <div style="padding:20px 32px;background:var(--gold-pale);border-bottom:1px solid rgba(212,168,67,0.3);">
+          <p style="color:#7c5c0a;font-size:0.9rem;font-weight:500;line-height:1.6;margin:0;">
+            <i class="fas fa-lightbulb" style="margin-right:6px;"></i>{{ topic.summary }}
+          </p>
+        </div>
+        {% endif %}
+        <div class="content-body">
+          <div class="md-content">{{ content_html|safe }}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        {% if prev_topic %}
+        <a href="{% url 'topic_detail' slug=prev_topic.slug %}" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> {{ prev_topic.title|truncatechars:35 }}
+        </a>
+        {% endif %}
+        {% if next_topic %}
+        <a href="{% url 'topic_detail' slug=next_topic.slug %}" class="btn btn-outline" style="margin-left:auto;">
+          {{ next_topic.title|truncatechars:35 }} <i class="fas fa-arrow-right"></i>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="topic-sidebar">
+      {% if user.is_authenticated %}
+      <div class="sidebar-card">
+        <div class="sidebar-card-header"><i class="fas fa-stopwatch" style="color:var(--gold);"></i> Study Timer</div>
+        <div class="sidebar-card-body">
+          <div class="timer-display" id="timer">00:00</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <button onclick="startTimer()" class="btn btn-primary btn-sm" id="startBtn"><i class="fas fa-play"></i> Start</button>
+            <button onclick="stopTimer()" class="btn btn-outline btn-sm" id="stopBtn" disabled><i class="fas fa-pause"></i> Pause</button>
+          </div>
+          <button onclick="resetTimer()" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:12px;"><i class="fas fa-redo"></i> Reset</button>
+          {% if progress and progress.completed %}
+            <div class="completed-badge"><i class="fas fa-check-circle"></i> Topic Completed!</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);">{{ progress.study_minutes }} minutes studied</div>
+          {% else %}
+            <form method="POST" action="{% url 'topic_complete' slug=topic.slug %}" id="completeForm">
+              {% csrf_token %}
+              <input type="hidden" name="minutes" id="studiedMinutes" value="0">
+              <button type="submit" class="btn btn-success btn-sm" style="width:100%;">
+                <i class="fas fa-check"></i> Mark as Complete
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-header"><i class="fas fa-pen" style="color:var(--paper2);"></i> Quick Practice</div>
+        <div class="sidebar-card-body">
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">{{ topic.get_question_count }} questions available for this topic.</p>
+          <a href="{% url 'exam_index' %}" class="btn btn-primary btn-sm" style="width:100%;">
+            <i class="fas fa-file-alt"></i> Start Mock Exam
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-header"><i class="fas fa-sticky-note" style="color:var(--warning);"></i> My Notes</div>
+        <div class="sidebar-card-body">
+          <textarea class="note-area" id="noteArea" placeholder="Write your study notes here...">{% if progress and progress.notes %}{{ progress.notes }}{% endif %}</textarea>
+          <button onclick="saveNotes()" class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;" id="saveNotesBtn">
+            <i class="fas fa-save"></i> Save Notes
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <div class="sidebar-card">
+        <div class="sidebar-card-body" style="text-align:center;padding:28px 18px;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🔐</div>
+          <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:16px;">Log in to track progress, take notes, and save your study time.</p>
+          <a href="{% url 'login' %}" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</a>
+          <a href="{% url 'register' %}" class="btn btn-outline btn-block" style="margin-top:8px;"><i class="fas fa-user-plus"></i> Register Free</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+let seconds = 0, interval = null;
+const timerEl = document.getElementById('timer');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+function pad(n){ return String(n).padStart(2,'0'); }
+function updateDisplay(){ if(timerEl) timerEl.textContent = pad(Math.floor(seconds/60))+':'+pad(seconds%60); }
+function startTimer(){ if(interval) return; interval=setInterval(()=>{seconds++;updateDisplay();},1000); if(startBtn){startBtn.disabled=true;} if(stopBtn){stopBtn.disabled=false;} }
+function stopTimer(){ clearInterval(interval);interval=null; if(startBtn){startBtn.disabled=false;} if(stopBtn){stopBtn.disabled=true;} }
+function resetTimer(){ stopTimer();seconds=0;updateDisplay(); }
+const completeForm=document.getElementById('completeForm');
+if(completeForm){ completeForm.addEventListener('submit',function(){ document.getElementById('studiedMinutes').value=Math.floor(seconds/60); }); }
+async function saveNotes(){
+  const btn=document.getElementById('saveNotesBtn');
+  const text=document.getElementById('noteArea').value;
+  btn.textContent='Saving...';
+  const resp=await fetch('{% url "topic_notes" slug=topic.slug %}',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':'{{ csrf_token }}'},body:'notes='+encodeURIComponent(text)});
+  if(resp.ok){btn.innerHTML='<i class="fas fa-check"></i> Saved!';setTimeout(()=>{btn.innerHTML='<i class="fas fa-save"></i> Save Notes';},2000);}
+}
+</script>
+{% endblock %}

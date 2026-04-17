@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+{% load core_tags %}
+{% block title %}Exam History{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>📜 Exam History</h1>
+    <p>All your past mock exam sessions</p>
+  </div>
+  {% if sessions.object_list %}
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--cream);">
+            <th style="padding:14px 20px;text-align:left;font-size:0.8rem;font-weight:700;color:var(--text-muted);">EXAM</th>
+            <th style="padding:14px 20px;text-align:center;font-size:0.8rem;font-weight:700;color:var(--text-muted);">SCORE</th>
+            <th style="padding:14px 20px;text-align:center;font-size:0.8rem;font-weight:700;color:var(--text-muted);">CORRECT</th>
+            <th style="padding:14px 20px;text-align:center;font-size:0.8rem;font-weight:700;color:var(--text-muted);">TIME</th>
+            <th style="padding:14px 20px;text-align:center;font-size:0.8rem;font-weight:700;color:var(--text-muted);">DATE</th>
+            <th style="padding:14px 20px;text-align:center;font-size:0.8rem;font-weight:700;color:var(--text-muted);">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr style="border-top:1px solid var(--border);">
+            <td style="padding:14px 20px;">
+              <div style="font-weight:600;font-size:0.9rem;color:var(--navy);">{{ s.title }}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">{{ s.paper|paper_label }}</div>
+            </td>
+            <td style="padding:14px 20px;text-align:center;">
+              <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:1rem;color:{% if s.score_percent >= 70 %}var(--success){% elif s.score_percent >= 55 %}var(--warning){% else %}var(--danger){% endif %};">
+                {{ s.score_percent|floatformat:1 }}%
+              </span>
+            </td>
+            <td style="padding:14px 20px;text-align:center;font-size:0.875rem;color:var(--text-muted);">{{ s.correct_answers }}/{{ s.total_questions }}</td>
+            <td style="padding:14px 20px;text-align:center;font-size:0.875rem;color:var(--text-muted);">{{ s.format_time }}</td>
+            <td style="padding:14px 20px;text-align:center;font-size:0.82rem;color:var(--text-muted);">{{ s.completed_at|date:"M d, Y" }}</td>
+            <td style="padding:14px 20px;text-align:center;">
+              <a href="{% url 'exam_results' session_id=s.id %}" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i> Review</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if sessions.has_other_pages %}
+  <div style="display:flex;justify-content:center;gap:8px;margin-top:24px;">
+    {% if sessions.has_previous %}
+    <a href="?page={{ sessions.previous_page_number }}" class="btn btn-outline btn-sm">← Prev</a>
+    {% endif %}
+    <span style="padding:8px 14px;font-size:0.875rem;color:var(--text-muted);">Page {{ sessions.number }} of {{ sessions.paginator.num_pages }}</span>
+    {% if sessions.has_next %}
+    <a href="?page={{ sessions.next_page_number }}" class="btn btn-outline btn-sm">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% else %}
+  <div style="text-align:center;padding:60px 24px;">
+    <div style="font-size:3rem;margin-bottom:16px;">📭</div>
+    <h3 style="color:var(--navy);margin-bottom:8px;">No exams taken yet</h3>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Take your first mock exam to see your history here.</p>
+    <a href="{% url 'exam_index' %}" class="btn btn-gold"><i class="fas fa-play"></i> Take Mock Exam</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
